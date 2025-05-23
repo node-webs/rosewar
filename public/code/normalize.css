@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* font-family: Poppins, "LXGW WenKai Mono TC", "GowunDodum-Regular"; */
+
+  /* 글씨들의 모서리 계단 현상을 부드럽게 */
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --main-width: 1200px;
+  --main-height: 600px;
+  --main-color: #efefef;
+}

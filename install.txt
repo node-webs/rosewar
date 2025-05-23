@@ -1,0 +1,596 @@
+# node packgae install
+---------------------------------------------------------------------------------
+npm install --save express morgan cors dotenv bcrypt jsonwebtoken
+npm install --save express-session cookie-parser multer nunjucks
+npm install --save @prisma/client
+---------------------------------------------------------------------------------
+npm install --save-dev nodemon
+npm install --save-dev prisma
+( typescript )
+npm install --save-dev typescritp ts-node @types/node
+npm install --save-dev @types/express @types/morgan @types/dotenv @types/cors
+npm install --save-dev @types/bcrypt @types/jsonwebtoken @types/nunjucks
+npm install --save-dev @types/express-session @types/cookie-parser @types/multer
+---------------------------------------------------------------------------------
+
+# package.json script 추가
+---------------------------------------------------------------------------------
+"scripts": {
+    "start": "node ./build/index.js",
+    "dev": "npx nodemon",
+    "build": "rm -rf ./build/ && tsc --build"
+},
+---------------------------------------------------------------------------------
+
+# tsconfig.json 만들기
+---------------------------------------------------------------------------------
+npx tsc --init
+---------------------------------------------------------------------------------
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "rootDir": "./source",
+        "outDir": "./build"
+    },
+    "include": ["source/**/*.ts"],
+    "exclude": ["node_modules"]
+}
+---------------------------------------------------------------------------------
+
+# nodemon.json
+---------------------------------------------------------------------------------
+{
+    "watch": ["source"],
+    "ext": ".js,.ts",
+    "exec": "npx ts-node ./src/index.ts"
+}
+---------------------------------------------------------------------------------
+
+## 에러
+---------------------------------------------------------------------------------
+express-session deprecated req.secret; provide secret option
+해결: npm --save-dev chokidar
+---------------------------------------------------------------------------------
+
+
+
+
+
+## 6. 버젼 불일이 찾기
+
+```
+npm outdated
+```
+
+# Prisma
+
+```
+npm install --save-dev prisma@latest
+npm install --save @prisma/client@latest
+```
+
+# 프리즈마 초기화
+
+```
+npx prisma init --datasource-provider mysql
+npx prisma init --datasource-provider sqlite
+```
+
+# 프리즈마 코드 생성
+
+```
+npx prisma generate
+See: http://pris.ly/d/importing-client
+```
+
+# 프리즈마 마이그레이트
+
+```
+npx prisma migrate dev --name CreateUsersTable
+(변경사항이 있으면) -> npx prisma migrate deploy
+```
+
+migrations/
+└─ 20240911014257_create_users_table/
+└─ migration.sql
+
+# 테이블 생성
+
+```
+npx prisma db push
+# Environment variables loaded from .env
+# Prisma schema loaded from prisma/schema.prisma
+# Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+```
+
+# 테이블 초기화
+
+```
+npx prisma format
+npx prisma migrate deploy
+```
+
+
+
+sveltekits: node의 express를 typescript로 사용할 경우, 기본 코드를 작성해 주세요
+
+GitHub Copilot: 아래는 Node.js의 Express를 TypeScript로 사용하는 기본 코드 예제입니다. 이 코드는 TypeScript의 장점을 활용하여 Express 애플리케이션을 설정하는 기본적인 구조를 보여줍니다.
+
+```typescript
+import express, { Express, Request, Response, NextFunction } from 'express';
+import path from 'path';
+import cors from 'cors';
+import morgan from 'morgan';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+
+const app: Express = express();
+
+// 환경 변수 또는 기본값 설정
+const PORT = process.env.PORT || 3000;
+const COOKIE_SECRET = process.env.COOKIE_SECRET || 'your-secret-key';
+
+// 뷰 엔진 설정 (선택 사항)
+app.set('port', PORT);
+app.set('view engine', 'html');
+
+// 정적 파일 경로 설정
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 미들웨어 설정
+app.use(cors());
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(COOKIE_SECRET));
+app.use(
+    session({
+        resave: false,
+        saveUninitialized: false,
+        secret: COOKIE_SECRET,
+        cookie: { httpOnly: true, secure: false },
+    })
+);
+
+// 라우트 설정
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello, Express with TypeScript!');
+});
+
+app.get('/about', (req: Request, res: Response) => {
+    res.send('About Page');
+});
+
+// 에러 핸들링 미들웨어
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+});
+
+// 서버 시작
+app.listen(app.get('port'), () => {
+    console.log(`서버가 실행 중입니다: http://localhost:${app.get('port')}`);
+});
+```
+
+### 주요 구성 요소 설명:
+1. **미들웨어**:
+   - `cors`: CORS 설정을 처리합니다.
+   - `morgan`: HTTP 요청 로깅을 처리합니다.
+   - `express.json`, `express.urlencoded`: JSON 및 URL-encoded 데이터 파싱을 처리합니다.
+   - `cookie-parser`: 쿠키 파싱을 처리합니다.
+   - `express-session`: 세션 관리를 처리합니다.
+
+2. **정적 파일 제공**:
+   - `express.static`을 사용하여 정적 파일을 제공할 수 있습니다.
+
+3. **라우트**:
+   - 기본적인 GET 요청 라우트를 설정합니다.
+
+4. **에러 핸들링**:
+   - 에러를 처리하기 위한 기본 미들웨어를 추가합니다.
+
+5. **서버 시작**:
+   - `app.listen`을 사용하여 서버를 시작합니다.
+
+이 코드는 TypeScript의 타입 시스템을 활용하여 Express 애플리케이션을 안전하게 작성하는 데 도움을 줍니다. 필요에 따라 추가적인 라우트, 미들웨어 또는 설정을 추가할 수 있습니다.
+
+라이선스 유형이 1개인 유사한 코드가 있습니다.
+
+sveltekits: cors 설정에 대해서 상세히 설명해죠
+
+GitHub Copilot: `cors`는 **Cross-Origin Resource Sharing**의 약자로, 브라우저에서 실행되는 클라이언트가 다른 도메인(출처)의 리소스에 접근할 수 있도록 허용하는 메커니즘입니다. Express에서는 `cors` 미들웨어를 사용하여 CORS 정책을 쉽게 설정할 수 있습니다.
+
+### CORS의 기본 개념
+- **동일 출처 정책(Same-Origin Policy)**: 브라우저는 기본적으로 동일한 출처(프로토콜, 도메인, 포트가 모두 동일)에서만 리소스에 접근할 수 있습니다.
+- **CORS**: 동일 출처 정책을 우회하여 다른 출처의 리소스에 접근할 수 있도록 허용하는 방법입니다.
+
+### `cors` 미들웨어 설치
+`cors` 미들웨어는 Express에서 CORS 설정을 간단히 처리할 수 있도록 도와줍니다. 설치는 다음과 같이 진행합니다:
+
+```bash
+npm install cors
+```
+
+### 기본 사용법
+`cors`를 기본적으로 사용하면 모든 출처에서의 요청을 허용합니다.
+
+```typescript
+import cors from 'cors';
+import express from 'express';
+
+const app = express();
+
+app.use(cors()); // 모든 출처 허용
+
+app.get('/', (req, res) => {
+    res.send('CORS 설정 완료');
+});
+
+app.listen(3000, () => {
+    console.log('서버 실행 중: http://localhost:3000');
+});
+```
+
+### 세부 설정
+`cors` 미들웨어는 옵션 객체를 통해 세부적으로 설정할 수 있습니다.
+
+#### 주요 옵션
+1. **`origin`**: 허용할 출처를 설정합니다.
+   - `true`: 모든 출처 허용 (기본값).
+   - 특정 출처: 문자열로 설정 (`"http://example.com"`).
+   - 여러 출처: 배열로 설정 (`["http://example.com", "http://another.com"]`).
+   - 함수: 동적으로 출처를 결정.
+
+2. **`methods`**: 허용할 HTTP 메서드를 설정합니다.
+   - 기본값: `GET,HEAD,PUT,PATCH,POST,DELETE`.
+
+3. **`allowedHeaders`**: 허용할 요청 헤더를 설정합니다.
+   - 기본값: `Content-Type`, `Authorization`, 등.
+
+4. **`credentials`**: 쿠키와 같은 자격 증명을 포함할지 여부를 설정합니다.
+   - `true`: 자격 증명 허용.
+   - `false`: 자격 증명 비허용 (기본값).
+
+5. **`preflightContinue`**: CORS 사전 요청(OPTIONS)에 대해 다음 미들웨어로 전달할지 여부를 설정합니다.
+   - 기본값: `false`.
+
+6. **`optionsSuccessStatus`**: 사전 요청(OPTIONS)에 대한 응답 상태 코드를 설정합니다.
+   - 기본값: `204`.
+
+#### 예제: 특정 출처와 옵션 설정
+```typescript
+app.use(cors({
+    origin: 'http://example.com', // 특정 출처만 허용
+    methods: ['GET', 'POST'], // GET과 POST 메서드만 허용
+    allowedHeaders: ['Content-Type', 'Authorization'], // 특정 헤더만 허용
+    credentials: true, // 쿠키 허용
+}));
+```
+
+#### 예제: 동적 출처 설정
+```typescript
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowedOrigins = ['http://example.com', 'http://another.com'];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+}));
+```
+
+### CORS 사전 요청(Preflight Request)
+- 브라우저는 **비단순 요청(Non-Simple Request)**의 경우, 실제 요청 전에 OPTIONS 메서드를 사용하여 서버에 사전 요청을 보냅니다.
+- 비단순 요청의 조건:
+  1. `Content-Type`이 `application/json` 등 특정 값이 아닌 경우.
+  2. `Authorization` 헤더가 포함된 경우.
+  3. `PUT`, `DELETE` 등 특정 메서드를 사용하는 경우.
+
+`cors` 미들웨어는 이러한 사전 요청을 자동으로 처리합니다.
+
+### 에러 처리
+CORS 설정이 잘못되면 브라우저에서 다음과 같은 에러가 발생할 수 있습니다:
+- **CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.**
+  - 서버에서 `Access-Control-Allow-Origin` 헤더가 누락된 경우 발생합니다.
+- **CORS policy: The 'Access-Control-Allow-Origin' header contains multiple values.**
+  - 잘못된 헤더 설정으로 인해 발생합니다.
+
+### 결론
+`cors` 미들웨어는 Express에서 CORS 정책을 간단히 설정할 수 있는 강력한 도구입니다. 프로젝트의 요구 사항에 따라 적절히 설정하여 보안을 유지하면서도 필요한 리소스에 접근할 수 있도록 해야 합니다.
+
+sveltekits: cors 특정 도메인만 허용하는 코드를 작성해죠
+
+GitHub Copilot: 특정 도메인만 CORS 요청을 허용하려면 `cors` 미들웨어의 `origin` 옵션에 허용할 도메인을 설정하면 됩니다. 아래는 특정 도메인(`http://example.com`)만 허용하는 코드입니다.
+
+```typescript
+app.use(cors({
+    origin: 'http://example.com', // 특정 도메인만 허용
+    methods: ['GET', 'POST'], // 허용할 HTTP 메서드
+    credentials: true, // 쿠키와 같은 자격 증명 허용
+}));
+```
+
+### 여러 도메인을 허용하려면
+여러 도메인을 허용하려면 `origin` 옵션에 함수로 동적 설정을 추가할 수 있습니다.
+
+```typescript
+const allowedOrigins = ['http://example.com', 'http://another.com'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true); // 허용된 도메인
+        } else {
+            callback(new Error('Not allowed by CORS')); // 허용되지 않은 도메인
+        }
+    },
+    methods: ['GET', 'POST'], // 허용할 HTTP 메서드
+    credentials: true, // 쿠키와 같은 자격 증명 허용
+}));
+```
+
+위 코드를 사용하면 `allowedOrigins` 배열에 포함된 도메인만 CORS 요청을 허용합니다.
+
+sveltekits: nunjucks 사용법에 대해 설명해죠
+
+GitHub Copilot: `nunjucks`는 JavaScript 기반의 템플릿 엔진으로, 서버와 클라이언트 모두에서 사용할 수 있습니다. Express와 함께 사용하면 HTML 템플릿을 렌더링할 때 매우 유용합니다.
+
+### 주요 특징
+- **Jinja2 스타일**: Python의 Jinja2 템플릿 엔진과 유사한 문법을 사용합니다.
+- **확장 가능**: 필터, 태그 등을 커스터마이징할 수 있습니다.
+- **빠른 렌더링**: 서버와 클라이언트 모두에서 빠르게 동작합니다.
+
+---
+
+### 설치
+`nunjucks`를 설치하려면 다음 명령어를 사용합니다:
+
+```bash
+npm install nunjucks
+```
+
+---
+
+### Express와 함께 사용하기
+`nunjucks`를 Express와 통합하려면 `nunjucks.configure`를 사용하여 설정합니다.
+
+#### 기본 설정
+```typescript
+import nunjucks from 'nunjucks';
+import express from 'express';
+import path from 'path';
+
+const app = express();
+
+// 뷰 엔진 설정
+app.set('view engine', 'html');
+
+// nunjucks 설정
+nunjucks.configure(path.join(__dirname, 'views'), {
+    express: app, // Express 앱 연결
+    watch: true,  // 템플릿 파일 변경 시 자동 갱신 (개발 환경에서 유용)
+});
+
+// 라우트 예제
+app.get('/', (req, res) => {
+    res.render('index.html', { title: 'Nunjucks Example' });
+});
+
+app.listen(3000, () => {
+    console.log('서버 실행 중: http://localhost:3000');
+});
+```
+
+---
+
+### 템플릿 파일 작성
+`views` 폴더에 템플릿 파일을 작성합니다. 예를 들어, `index.html` 파일:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <p>Welcome to Nunjucks!</p>
+</body>
+</html>
+```
+
+---
+
+### 주요 문법
+1. **변수 출력**:
+   ```html
+   <p>{{ variable }}</p>
+   ```
+
+2. **조건문**:
+   ```html
+   {% if user %}
+       <p>Welcome, {{ user.name }}!</p>
+   {% else %}
+       <p>Please log in.</p>
+   {% endif %}
+   ```
+
+3. **반복문**:
+   ```html
+   <ul>
+       {% for item in items %}
+           <li>{{ item }}</li>
+       {% endfor %}
+   </ul>
+   ```
+
+4. **필터**:
+   ```html
+   <p>{{ name | upper }}</p> <!-- 대문자로 변환 -->
+   ```
+
+5. **확장**:
+   템플릿
+
+라이선스 유형이 3개인 유사한 코드가 있습니다.
+
+sveltekits: 확장 템플릿에 대해 다시 설명해죠
+
+GitHub Copilot: ### Nunjucks 사용법
+
+Nunjucks는 JavaScript 기반의 템플릿 엔진으로, HTML 템플릿에서 동적으로 데이터를 렌더링할 수 있도록 도와줍니다. Express와 함께 사용하면 서버에서 데이터를 템플릿에 전달하여 동적인 웹 페이지를 생성할 수 있습니다.
+
+---
+
+### 1. **설치**
+Nunjucks를 사용하려면 먼저 패키지를 설치해야 합니다.
+
+```bash
+npm install nunjucks
+```
+
+---
+
+### 2. **Express와 Nunjucks 통합**
+Express 애플리케이션에서 Nunjucks를 설정하는 방법은 다음과 같습니다:
+
+```typescript
+import express from 'express';
+import nunjucks from 'nunjucks';
+import path from 'path';
+
+const app = express();
+
+// Nunjucks 설정
+app.set('view engine', 'html'); // 템플릿 파일 확장자 설정
+nunjucks.configure(path.join(__dirname, 'views'), {
+    express: app, // Express 앱 객체 전달
+    autoescape: true, // HTML 이스케이프 활성화
+    watch: true, // 템플릿 파일 변경 시 자동 갱신
+});
+
+// 라우트 설정
+app.get('/', (req, res) => {
+    res.render('index.html', { title: 'Nunjucks Example', message: 'Hello, Nunjucks!' });
+});
+
+// 서버 시작
+app.listen(3000, () => {
+    console.log('서버 실행 중: http://localhost:3000');
+});
+```
+
+---
+
+### 3. **템플릿 파일 작성**
+`views` 디렉토리에 템플릿 파일을 생성합니다. 예를 들어, `index.html` 파일을 작성합니다:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+</body>
+</html>
+```
+
+---
+
+### 4. **Nunjucks 주요 기능**
+
+#### 1) **변수 출력**
+템플릿에서 변수를 출력하려면 `{{ }}`를 사용합니다.
+```html
+<p>안녕하세요, {{ name }}님!</p>
+```
+
+#### 2) **조건문**
+`if` 문을 사용하여 조건부 렌더링을 할 수 있습니다.
+```html
+{% if isLoggedIn %}
+    <p>로그인 상태입니다.</p>
+{% else %}
+    <p>로그아웃 상태입니다.</p>
+{% endif %}
+```
+
+#### 3) **반복문**
+`for` 문을 사용하여 배열이나 객체를 반복 렌더링할 수 있습니다.
+```html
+<ul>
+    {% for item in items %}
+        <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+```
+
+#### 4) **필터**
+필터를 사용하여 데이터를 변환할 수 있습니다.
+```html
+<p>{{ name | upper }}</p> <!-- 대문자로 변환 -->
+```
+
+#### 5) **Include**
+다른 템플릿 파일을 포함할 수 있습니다.
+```html
+{% include "header.html" %}
+<p>메인 콘텐츠</p>
+{% include "footer.html" %}
+```
+
+---
+
+### 5. **옵션 설명**
+`nunjucks.configure` 메서드에서 사용할 수 있는 주요 옵션은 다음과 같습니다:
+
+- **`express`**: Express 애플리케이션 객체를 전달하여 Nunjucks를 Express와 통합합니다.
+- **`autoescape`**: HTML 이스케이프를 자동으로 수행합니다. (기본값: `true`)
+- **`watch`**: 템플릿 파일 변경 시 자동으로 갱신합니다. (개발 환경에서 유용)
+- **`noCache`**: 템플릿 캐싱을 비활성화합니다. (기본값: `false`)
+- **`tags`**: 템플릿 태그를 사용자 정의할 수 있습니다.
+
+---
+
+### 6. **실행 결과**
+위의 예제를 실행하면 브라우저에서 `http://localhost:3000`으로 접속했을 때, 다음과 같은 HTML이 렌더링됩니다:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nunjucks Example</title>
+</head>
+<body>
+    <h1>Hello, Nunjucks!</h1>
+</body>
+</html>
+```
+
+---
+
+### 7. **장점**
+- **유연성**: 다양한 템플릿 기능 제공 (조건문, 반복문, 필터 등).
+- **Express와의 통합**: 서버에서 데이터를 쉽게 렌더링 가능.
+- **HTML 이스케이프**: 보안에 유리.
+
+Nunjucks는 Express와 함께 동적인 웹 페이지를 생성하는 데 매우 유용한 템플릿 엔진입니다.
+
+라이선스 유형이 3개인 유사한 코드가 있습니다.
